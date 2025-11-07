@@ -39,3 +39,5 @@
 
 ```bash
 node run_poc_only.js
+# run only one
+node run_poc_only.js --only 184a32500cef1ecfdc7b1ecd

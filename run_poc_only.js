@@ -20,6 +20,10 @@ const RESULTS_DIR = path.join(__dirname, "results");
 const INPUT_DIR = path.join(__dirname, "inputs");
 const EVAL_PROMPT_PATH = path.join(__dirname, "eval", "prompts", "poc_only_evaluator.md");
 
+// Optional CLI argument: --only <POC_ID>
+const onlyIndex = process.argv.indexOf("--only");
+const onlyPocId = onlyIndex !== -1 ? process.argv[onlyIndex + 1] : null;
+
 // Azure evaluator setup
 const apiKey = process.env.AZURE_OPENAI_API_KEY;
 const endpoint = "https://swedishopenaibook.openai.azure.com/";
@@ -158,8 +162,16 @@ async function main() {
   let testCounter = 1;
   for (const poc of pocs) {
     const pocId = poc.poc_id.trim();
+  
+    // ✅ Skip all POCs except the one specified with --only
+    if (onlyPocId && pocId !== onlyPocId) {
+      console.log(`⏭️  Skipping POC ${pocId} (only running ${onlyPocId})`);
+      continue;
+    }
+  
     const pocQuestions = questions.filter((q) => q.poc_id.trim() === pocId);
     if (!pocQuestions.length) continue;
+  
 
     const testDir = path.join(RESULTS_DIR, `test_${testCounter++}`);
     fs.mkdirSync(testDir, { recursive: true });
