@@ -1,0 +1,19 @@
+{
+  "name": "rag-2.0-spiel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "run_poc_only.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "dotenv": "^17.2.3",
+    "openai": "^6.3.0",
+    "xlsx": "^0.18.5"
+  }
+}

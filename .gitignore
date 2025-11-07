@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Local environment
+.env
+
+# Results from automation
+results/
+
+# System / editor files
+.DS_Store
+.vscode/
+.specstory/
+.cursorindexingignore
+
+# Logs and temp files
+*.log
+*.tmp
+.env
