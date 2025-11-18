@@ -77,26 +77,56 @@ function readCsv(filePath) {
   return parse(text, { columns: true, skip_empty_lines: true });
 }
 
+// to get the answer from the url in a text style
 function fetchStreamText(url) {
   return new Promise((resolve, reject) => {
     https
       .get(url, (res) => {
         let chunks = "";
+
         res.on("data", (d) => {
-          const s = d.toString();
-          if (s.startsWith("data:")) {
-            const payload = s.replace(/^data:\s*/, "").trim();
-            if (payload && payload !== "[DONE]") {
-              try {
-                const json = JSON.parse(payload);
-                if (json.text) chunks += json.text;
-              } catch {
-                chunks += payload;
+          const str = d.toString();
+          const lines = str.split("\n");
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+
+            // Remove "data:" prefix
+            const payload = trimmed.replace(/^data:\s*/, "");
+            if (!payload || payload === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(payload);
+
+              // Case 1: backend sends a plain JSON string, e.g. "Die "
+              if (typeof parsed === "string") {
+                chunks += parsed;
               }
+              // Case 2: object with .text field
+              else if (parsed.text) {
+                chunks += parsed.text;
+              }
+              // Case 3: OpenAI-style delta objects
+              else if (
+                parsed.choices &&
+                parsed.choices[0] &&
+                parsed.choices[0].delta &&
+                parsed.choices[0].delta.content
+              ) {
+                chunks += parsed.choices[0].delta.content;
+              }
+              // Fallback: ignore other shapes
+            } catch {
+              // Not JSON? just append raw payload without "data:" label
+              chunks += payload;
             }
           }
         });
-        res.on("end", () => resolve(chunks.trim()));
+
+        res.on("end", () => {
+          resolve(chunks.trim());
+        });
       })
       .on("error", reject);
   });
